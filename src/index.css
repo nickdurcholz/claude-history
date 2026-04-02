@@ -110,6 +110,20 @@ h1 {
   word-break: break-all;
 }
 
+/* ── Card Stats ── */
+
+.card-stats {
+  display: flex;
+  gap: 1em;
+  font-size: 0.78rem;
+  color: #525c69;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
 /* ── Card Body ── */
 
 .card-body {

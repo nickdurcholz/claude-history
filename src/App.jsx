@@ -13,6 +13,23 @@ function shortenDir(path) {
     .replace(/^C:\\Users\\[^\\]+/, '~');
 }
 
+function formatDuration(ms) {
+  if (!ms || ms <= 0) return null;
+  const totalMin = Math.floor(ms / 60000);
+  if (totalMin < 1) return '<1m';
+  if (totalMin < 60) return `${totalMin}m`;
+  const hours = Math.floor(totalMin / 60);
+  const mins = totalMin % 60;
+  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+}
+
+function formatTokens(n) {
+  if (!n) return '0';
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(n);
+}
+
 function ClickToCopy({ text }) {
   const [copied, setCopied] = useState(false);
 
@@ -52,6 +69,15 @@ function SessionCard({ session }) {
       <div className="card-header">
         <span className="card-time">{formatTime(session.lastTime)}</span>
         <span className="card-dir">{shortenDir(session.project)}</span>
+      </div>
+
+      <div className="card-stats">
+        {formatDuration(session.durationMs) && (
+          <span className="stat">{formatDuration(session.durationMs)}</span>
+        )}
+        {session.maxContext > 0 && (
+          <span className="stat">{formatTokens(session.maxContext)} context</span>
+        )}
       </div>
 
       <div className="card-body">

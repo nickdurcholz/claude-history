@@ -1,5 +1,5 @@
 import express from 'express';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -13,6 +13,37 @@ function isRealUserMessage(display) {
   if (display.startsWith('/')) return false;
   if (display.startsWith('<')) return false;
   return true;
+}
+
+function projectToSlug(project) {
+  return project.replace(/\//g, '-');
+}
+
+function getSessionContext(project, sessionId) {
+  const slug = projectToSlug(project);
+  const convPath = join(CLAUDE_DIR, 'projects', slug, `${sessionId}.jsonl`);
+  if (!existsSync(convPath)) return null;
+
+  let maxContext = 0;
+
+  const lines = readFileSync(convPath, 'utf-8').split('\n');
+  for (const line of lines) {
+    if (!line) continue;
+    try {
+      const entry = JSON.parse(line);
+      const usage = entry.message?.usage;
+      if (usage) {
+        const context = (usage.input_tokens || 0)
+          + (usage.cache_creation_input_tokens || 0)
+          + (usage.cache_read_input_tokens || 0);
+        if (context > maxContext) maxContext = context;
+      }
+    } catch {
+      // skip malformed lines
+    }
+  }
+
+  return maxContext;
 }
 
 app.get('/api/sessions', (_req, res) => {
@@ -42,6 +73,7 @@ app.get('/api/sessions', (_req, res) => {
 
     const session = sessionMap.get(sessionId);
     session.lastTime = Math.max(session.lastTime, timestamp);
+    session.startTime = Math.min(session.startTime, timestamp);
 
     if (isRealUserMessage(display)) {
       if (!session.firstMessage) {
@@ -54,6 +86,14 @@ app.get('/api/sessions', (_req, res) => {
   const sessions = Array.from(sessionMap.values())
     .filter((s) => s.firstMessage)
     .sort((a, b) => b.lastTime - a.lastTime);
+
+  for (const session of sessions) {
+    session.durationMs = session.lastTime - session.startTime;
+    const maxContext = getSessionContext(session.project, session.sessionId);
+    if (maxContext) {
+      session.maxContext = maxContext;
+    }
+  }
 
   res.json(sessions);
 });
