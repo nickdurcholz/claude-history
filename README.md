@@ -1,4 +1,4 @@
-# cc-dash
+# claude-history
 
 A personal dashboard for browsing Claude Code conversation history. Reads the `~/.claude/history.jsonl` file and presents sessions as clickable cards showing timestamps, directories, and message previews.
 
