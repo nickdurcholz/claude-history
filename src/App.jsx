@@ -98,6 +98,7 @@ export default function App() {
   return (
     <div className="container">
       <header className="page-header">
+        <img src="/favicon.png" alt="" className="page-logo" />
         <h1>Claude Code History</h1>
         <span className="subtitle">{sessions.length} sessions</span>
       </header>
