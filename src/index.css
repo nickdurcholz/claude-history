@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0a0e14;
+  color: #bfcad6;
+  line-height: 1.6;
+}
+
+.container {
+  padding: 2em 3em;
+}
+
+.page-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1em;
+  margin-bottom: 1.25em;
+  border-bottom: 1px solid #1a1f2b;
+  padding-bottom: 0.75em;
+}
+
+h1 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #e6edf3;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  color: #525c69;
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.status {
+  padding: 4em;
+  text-align: center;
+  font-size: 1rem;
+  color: #525c69;
+}
+
+.status.error {
+  color: #e55b50;
+}
+
+/* ── Table ── */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  table-layout: fixed;
+}
+
+thead th {
+  text-align: left;
+  padding: 0.6em 1em;
+  border-bottom: 1px solid #1a1f2b;
+  color: #6b7688;
+  font-weight: 500;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  position: sticky;
+  top: 0;
+  background: #0a0e14;
+  z-index: 1;
+}
+
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+
+.sortable-th:hover {
+  color: #c0c8d4;
+}
+
+tbody tr {
+  transition: background 0.1s;
+}
+
+tbody tr:hover {
+  background: #10141c;
+}
+
+td {
+  padding: 0.75em 1em;
+  border-bottom: 1px solid #12161e;
+  vertical-align: top;
+  line-height: 1.55;
+}
+
+/* Column widths */
+.cell-time {
+  width: 11em;
+  white-space: nowrap;
+  color: #6b7688;
+  font-variant-numeric: tabular-nums;
+}
+
+.cell-dir {
+  width: 14em;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.82rem;
+  color: #7a8594;
+  word-break: break-all;
+}
+
+.cell-session {
+  width: 20em;
+  white-space: nowrap;
+}
+
+.cell-msg {
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #9ba7b5;
+}
+
+/* ── Click-to-copy resume code ── */
+
+.resume-cmd {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  background: #12161e;
+  color: #8b97a6;
+  padding: 0.2em 0.5em;
+  border-radius: 3px;
+  border: 1px solid #1e2430;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  display: inline-block;
+}
+
+.resume-cmd:hover {
+  background: #1a1f2b;
+  color: #c0c8d4;
+  border-color: #2a3140;
+}
+
+.resume-cmd--copied {
+  background: #122418;
+  color: #3fb950;
+  border-color: #1a3a24;
+}
