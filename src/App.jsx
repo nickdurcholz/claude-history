@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 
 function formatTime(ts) {
   const d = new Date(ts);
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-    + ' ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    + ' \u00b7 ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 }
 
 function shortenDir(path) {
@@ -33,22 +33,36 @@ function ClickToCopy({ text }) {
   );
 }
 
-const SORT_KEYS = {
-  time: (s) => s.startTime,
-  directory: (s) => (s.project || '').toLowerCase(),
-  resume: (s) => s.sessionId,
-  first: (s) => (s.firstMessage || '').toLowerCase(),
-  last: (s) => (s.lastMessage || '').toLowerCase(),
-};
-
-function SortHeader({ label, sortKey, currentSort, onSort }) {
-  const active = currentSort.key === sortKey;
-  const arrow = active ? (currentSort.asc ? ' \u25B2' : ' \u25BC') : '';
+function SessionCard({ session }) {
+  const hasDistinctLast = session.lastMessage
+    && session.firstMessage
+    && session.lastMessage !== session.firstMessage;
 
   return (
-    <th onClick={() => onSort(sortKey)} className="sortable-th">
-      {label}{arrow}
-    </th>
+    <div className="card">
+      <div className="card-header">
+        <span className="card-time">{formatTime(session.lastTime)}</span>
+        <span className="card-dir">{shortenDir(session.project)}</span>
+      </div>
+
+      <div className="card-body">
+        {session.firstMessage && (
+          <p className="card-msg card-msg--first">
+            <span className="msg-label">{hasDistinctLast ? 'First:' : 'User message:'}</span>
+            {session.firstMessage}
+          </p>
+        )}
+        {hasDistinctLast && (
+          <p className="card-msg card-msg--last">
+            <span className="msg-label">Last:</span> {session.lastMessage}
+          </p>
+        )}
+      </div>
+
+      <div className="card-footer">
+        <ClickToCopy text={`--resume ${session.sessionId}`} />
+      </div>
+    </div>
   );
 }
 
@@ -56,7 +70,6 @@ export default function App() {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [sort, setSort] = useState({ key: 'time', asc: false });
 
   useEffect(() => {
     fetch('/api/sessions')
@@ -69,21 +82,6 @@ export default function App() {
       .finally(() => setLoading(false));
   }, []);
 
-  const sorted = useMemo(() => {
-    const fn = SORT_KEYS[sort.key];
-    return [...sessions].sort((a, b) => {
-      const av = fn(a), bv = fn(b);
-      const cmp = av < bv ? -1 : av > bv ? 1 : 0;
-      return sort.asc ? cmp : -cmp;
-    });
-  }, [sessions, sort]);
-
-  const handleSort = (key) => {
-    setSort((prev) =>
-      prev.key === key ? { key, asc: !prev.asc } : { key, asc: true }
-    );
-  };
-
   if (loading) return <div className="status">Loading...</div>;
   if (error) return <div className="status error">Error: {error}</div>;
   if (!sessions.length) return <div className="status">No sessions found.</div>;
@@ -94,30 +92,11 @@ export default function App() {
         <h1>Claude Code History</h1>
         <span className="subtitle">{sessions.length} sessions</span>
       </header>
-      <table>
-        <thead>
-          <tr>
-            <SortHeader label="Time" sortKey="time" currentSort={sort} onSort={handleSort} />
-            <SortHeader label="Directory" sortKey="directory" currentSort={sort} onSort={handleSort} />
-            <SortHeader label="Resume" sortKey="resume" currentSort={sort} onSort={handleSort} />
-            <SortHeader label="First Message" sortKey="first" currentSort={sort} onSort={handleSort} />
-            <SortHeader label="Last Message" sortKey="last" currentSort={sort} onSort={handleSort} />
-          </tr>
-        </thead>
-        <tbody>
-          {sorted.map((s) => (
-            <tr key={s.sessionId}>
-              <td className="cell-time">{formatTime(s.startTime)}</td>
-              <td className="cell-dir">{shortenDir(s.project)}</td>
-              <td className="cell-session">
-                <ClickToCopy text={`--resume ${s.sessionId}`} />
-              </td>
-              <td className="cell-msg">{s.firstMessage || '\u2014'}</td>
-              <td className="cell-msg">{s.lastMessage || '\u2014'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="card-grid">
+        {sessions.map((s) => (
+          <SessionCard key={s.sessionId} session={s} />
+        ))}
+      </div>
     </div>
   );
 }

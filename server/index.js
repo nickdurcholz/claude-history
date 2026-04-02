@@ -51,9 +51,9 @@ app.get('/api/sessions', (_req, res) => {
     }
   }
 
-  const sessions = Array.from(sessionMap.values()).sort(
-    (a, b) => b.startTime - a.startTime
-  );
+  const sessions = Array.from(sessionMap.values())
+    .filter((s) => s.firstMessage)
+    .sort((a, b) => b.lastTime - a.lastTime);
 
   res.json(sessions);
 });
