@@ -69,11 +69,16 @@ h1 {
   flex: 1 1 420px;
   max-width: 720px;
   min-width: 320px;
+  cursor: pointer;
   transition: border-color 0.15s;
 }
 
 .card:hover {
   border-color: #2a3140;
+}
+
+.card--copied {
+  border-color: #1a3a24;
 }
 
 /* ── Card Header ── */
@@ -157,19 +162,5 @@ h1 {
   padding: 0.2em 0.5em;
   border-radius: 3px;
   border: 1px solid #1e2430;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
   display: inline-block;
-}
-
-.resume-cmd:hover {
-  background: #1a1f2b;
-  color: #c0c8d4;
-  border-color: #2a3140;
-}
-
-.resume-cmd--copied {
-  background: #122418;
-  color: #3fb950;
-  border-color: #1a3a24;
 }

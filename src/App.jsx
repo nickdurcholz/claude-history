@@ -34,12 +34,21 @@ function ClickToCopy({ text }) {
 }
 
 function SessionCard({ session }) {
+  const [copied, setCopied] = useState(false);
   const hasDistinctLast = session.lastMessage
     && session.firstMessage
     && session.lastMessage !== session.firstMessage;
 
+  const resumeText = `--resume ${session.sessionId}`;
+
+  const handleCardClick = async () => {
+    await navigator.clipboard.writeText(resumeText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1200);
+  };
+
   return (
-    <div className="card">
+    <div className={`card ${copied ? 'card--copied' : ''}`} onClick={handleCardClick}>
       <div className="card-header">
         <span className="card-time">{formatTime(session.lastTime)}</span>
         <span className="card-dir">{shortenDir(session.project)}</span>
@@ -60,7 +69,7 @@ function SessionCard({ session }) {
       </div>
 
       <div className="card-footer">
-        <ClickToCopy text={`--resume ${session.sessionId}`} />
+        <code className="resume-cmd">{copied ? 'Copied!' : resumeText}</code>
       </div>
     </div>
   );
