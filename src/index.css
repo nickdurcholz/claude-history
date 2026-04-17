@@ -171,6 +171,28 @@ h1 {
   padding-top: 0.6em;
 }
 
+/* ── Project Filter ── */
+
+.project-filter {
+  margin-left: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.8rem;
+  color: #c0c8d4;
+  background: #12161e;
+  border: 1px solid #1e2430;
+  border-radius: 4px;
+  padding: 0.35em 0.6em;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  max-width: 24em;
+}
+
+.project-filter:hover,
+.project-filter:focus {
+  border-color: #2a3140;
+  outline: none;
+}
+
 /* ── Load More ── */
 
 .load-more {

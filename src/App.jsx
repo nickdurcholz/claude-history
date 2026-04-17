@@ -108,6 +108,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cutoff, setCutoff] = useState(Date.now() - SEVEN_DAYS);
+  const [project, setProject] = useState('');
 
   useEffect(() => {
     fetch('/api/sessions')
@@ -124,15 +125,35 @@ export default function App() {
   if (error) return <div className="status error">Error: {error}</div>;
   if (!sessions.length) return <div className="status">No sessions found.</div>;
 
-  const visible = sessions.filter((s) => s.lastTime >= cutoff);
-  const hasMore = visible.length < sessions.length;
+  const projectCounts = sessions.reduce((acc, s) => {
+    const key = shortenDir(s.project) || '(unknown)';
+    acc.set(key, (acc.get(key) || 0) + 1);
+    return acc;
+  }, new Map());
+  const projectOptions = [...projectCounts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+
+  const projectFiltered = project
+    ? sessions.filter((s) => (shortenDir(s.project) || '(unknown)') === project)
+    : sessions;
+  const visible = projectFiltered.filter((s) => s.lastTime >= cutoff);
+  const hasMore = visible.length < projectFiltered.length;
 
   return (
     <div className="container">
       <header className="page-header">
         <img src="/favicon.png" alt="" className="page-logo" />
         <h1>Claude Code History</h1>
-        <span className="subtitle">{visible.length} of {sessions.length} sessions</span>
+        <span className="subtitle">{visible.length} of {projectFiltered.length} sessions</span>
+        <select
+          className="project-filter"
+          value={project}
+          onChange={(e) => setProject(e.target.value)}
+        >
+          <option value="">All projects</option>
+          {projectOptions.map(([name, count]) => (
+            <option key={name} value={name}>{name} ({count})</option>
+          ))}
+        </select>
       </header>
       <div className="card-grid">
         {visible.map((s) => (
