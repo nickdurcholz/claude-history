@@ -56,7 +56,7 @@ function SessionCard({ session }) {
     && session.firstMessage
     && session.lastMessage !== session.firstMessage;
 
-  const resumeText = `--resume ${session.sessionId}`;
+  const resumeText = `(cd ${session.project} && claude --resume ${session.sessionId})`;
 
   const handleCardClick = async () => {
     await navigator.clipboard.writeText(resumeText);

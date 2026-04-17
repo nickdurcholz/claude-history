@@ -15,7 +15,7 @@ cc-dash is a single-page React app with an Express backend for browsing Claude C
 
 `history.jsonl` has one JSON object per line with fields: `display` (user input text), `timestamp` (epoch ms), `project` (working directory), `sessionId` (UUID), `pastedContents` (object).
 
-A "real user message" is one where `display` does not start with `/` (slash command) or `<` (system message). Sessions with no real user messages are filtered out.
+A "real user message" is one where `display` does not start with `/` (slash command), `<` (system message), or `!` (bash command). Sessions with no real user messages are filtered out.
 
 ## Building and running
 

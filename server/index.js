@@ -12,6 +12,7 @@ function isRealUserMessage(display) {
   if (!display) return false;
   if (display.startsWith('/')) return false;
   if (display.startsWith('<')) return false;
+  if (display.startsWith('!')) return false;
   return true;
 }
 
@@ -53,11 +54,24 @@ app.get('/api/sessions', (_req, res) => {
   }
 
   const lines = readFileSync(historyPath, 'utf-8').trim().split('\n');
-  const sessionMap = new Map();
+  const entries = [];
+  const bashEchoes = new Map();
 
   for (const line of lines) {
     if (!line) continue;
     const entry = JSON.parse(line);
+    entries.push(entry);
+    if (entry.display && entry.display.startsWith('!')) {
+      if (!bashEchoes.has(entry.sessionId)) {
+        bashEchoes.set(entry.sessionId, new Set());
+      }
+      bashEchoes.get(entry.sessionId).add(entry.display.slice(1));
+    }
+  }
+
+  const sessionMap = new Map();
+
+  for (const entry of entries) {
     const { sessionId, timestamp, project, display } = entry;
 
     if (!sessionMap.has(sessionId)) {
@@ -75,12 +89,13 @@ app.get('/api/sessions', (_req, res) => {
     session.lastTime = Math.max(session.lastTime, timestamp);
     session.startTime = Math.min(session.startTime, timestamp);
 
-    if (isRealUserMessage(display)) {
-      if (!session.firstMessage) {
-        session.firstMessage = display;
-      }
-      session.lastMessage = display;
+    if (!isRealUserMessage(display)) continue;
+    if (bashEchoes.get(sessionId)?.has(display)) continue;
+
+    if (!session.firstMessage) {
+      session.firstMessage = display;
     }
+    session.lastMessage = display;
   }
 
   const sessions = Array.from(sessionMap.values())
