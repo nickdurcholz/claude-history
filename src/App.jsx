@@ -101,10 +101,13 @@ function SessionCard({ session }) {
   );
 }
 
+const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+
 export default function App() {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [cutoff, setCutoff] = useState(Date.now() - SEVEN_DAYS);
 
   useEffect(() => {
     fetch('/api/sessions')
@@ -121,18 +124,26 @@ export default function App() {
   if (error) return <div className="status error">Error: {error}</div>;
   if (!sessions.length) return <div className="status">No sessions found.</div>;
 
+  const visible = sessions.filter((s) => s.lastTime >= cutoff);
+  const hasMore = visible.length < sessions.length;
+
   return (
     <div className="container">
       <header className="page-header">
         <img src="/favicon.png" alt="" className="page-logo" />
         <h1>Claude Code History</h1>
-        <span className="subtitle">{sessions.length} sessions</span>
+        <span className="subtitle">{visible.length} of {sessions.length} sessions</span>
       </header>
       <div className="card-grid">
-        {sessions.map((s) => (
+        {visible.map((s) => (
           <SessionCard key={s.sessionId} session={s} />
         ))}
       </div>
+      {hasMore && (
+        <button className="load-more" onClick={() => setCutoff(cutoff - SEVEN_DAYS)}>
+          Load more
+        </button>
+      )}
     </div>
   );
 }
