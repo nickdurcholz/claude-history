@@ -13,12 +13,12 @@ docker build -t cc-dash .
 docker run -d \
   --name claude-history \
   --restart unless-stopped \
-  -p 3000:3000 \
+  -p 3210:3210 \
   -v ~/.claude:/.claude:ro \
   cc-dash
 ```
 
-Then open http://localhost:3000.
+Then open http://localhost:3210.
 
 ## Local development
 
@@ -32,7 +32,7 @@ npm run server
 npm run dev
 ```
 
-The Vite dev server proxies `/api` requests to the Express backend on port 3001.
+The Vite dev server proxies `/api` requests to the Express backend on port 3210.
 
 ## How it works
 

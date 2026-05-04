@@ -12,6 +12,6 @@ COPY --from=build /app/server ./server
 COPY --from=build /app/package.json ./
 RUN npm install --omit=dev
 ENV CLAUDE_DIR=/.claude
-ENV PORT=3000
-EXPOSE 3000
+ENV PORT=3210
+EXPOSE 3210
 CMD ["node", "server/index.js"]

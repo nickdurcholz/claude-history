@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3210;
 const CLAUDE_DIR = process.env.CLAUDE_DIR || join(process.env.HOME, '.claude');
 
 function isRealUserMessage(display) {
