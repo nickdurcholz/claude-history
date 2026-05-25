@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+docker stop claude-history && docker rm claude-history && docker build -t cc-dash . && docker run -d --name claude-history --restart unless-stopped -p 3210:3210 -v ~/.claude:/.claude:ro cc-dash
