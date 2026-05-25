@@ -47,6 +47,72 @@ function getSessionContext(project, sessionId) {
   return maxContext;
 }
 
+app.get('/api/sessions/:sessionId/messages', (req, res) => {
+  const { sessionId } = req.params;
+  const project = req.query.project;
+  if (!project) return res.status(400).json({ error: 'project required' });
+
+  const slug = projectToSlug(project);
+  const convPath = join(CLAUDE_DIR, 'projects', slug, `${sessionId}.jsonl`);
+  if (!existsSync(convPath)) return res.status(404).json({ error: 'not found' });
+
+  const messages = [];
+  const lines = readFileSync(convPath, 'utf-8').split('\n');
+
+  for (const line of lines) {
+    if (!line) continue;
+    let entry;
+    try {
+      entry = JSON.parse(line);
+    } catch {
+      continue;
+    }
+    if (entry.type !== 'user' && entry.type !== 'assistant') continue;
+    if (entry.isSidechain) continue;
+
+    const msg = entry.message;
+    if (!msg) continue;
+
+    const blocks = [];
+    const content = msg.content;
+
+    if (typeof content === 'string') {
+      if (content.trim()) blocks.push({ type: 'text', text: content });
+    } else if (Array.isArray(content)) {
+      for (const c of content) {
+        if (!c || typeof c !== 'object') continue;
+        if (c.type === 'text' && c.text) {
+          blocks.push({ type: 'text', text: c.text });
+        } else if (c.type === 'thinking' && c.thinking) {
+          blocks.push({ type: 'thinking', text: c.thinking });
+        } else if (c.type === 'tool_use') {
+          blocks.push({ type: 'tool_use', name: c.name, input: c.input });
+        } else if (c.type === 'tool_result') {
+          let text = '';
+          if (typeof c.content === 'string') {
+            text = c.content;
+          } else if (Array.isArray(c.content)) {
+            text = c.content
+              .map((x) => (typeof x === 'string' ? x : x?.text || ''))
+              .join('\n');
+          }
+          blocks.push({ type: 'tool_result', text, isError: !!c.is_error });
+        }
+      }
+    }
+
+    if (blocks.length === 0) continue;
+
+    messages.push({
+      role: entry.type,
+      timestamp: entry.timestamp,
+      blocks,
+    });
+  }
+
+  res.json({ sessionId, project, messages });
+});
+
 app.get('/api/sessions', (_req, res) => {
   const historyPath = join(CLAUDE_DIR, 'history.jsonl');
   if (!existsSync(historyPath)) {
